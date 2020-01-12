@@ -147,8 +147,6 @@ typedef enum {
 
     self.keyboardHeight = keyboardSize.height;
 
-    NSLog(@"%f", self.keyboardHeight);
-
     CGFloat distanceToBottom = self.scrollView.frame.size.height - self.activeField.frame.origin.y - self.activeField.frame.size.height;
 
     CGFloat collapseSpace = self.keyboardHeight - distanceToBottom;
@@ -198,9 +196,7 @@ typedef enum {
         }];
         
         self.willMakeKeyboardOffset = NO;
-        
-        NSLog(@"%f", self.keyboardHeight);
-        
+                
     }
     
     self.keyboardHeight = 0;
@@ -212,8 +208,6 @@ typedef enum {
     UITextField* currentTextField = notification.object;
     
     if (currentTextField.tag != regFormPass) {
-        
-        NSLog(@"%@", [@(currentTextField.tag) stringValue]);
         
         UILabel* currentLabel = [self.mapingTextFieldsLabelsDictionary objectForKey:[@(currentTextField.tag) stringValue]];
         currentLabel.text = currentTextField.text;

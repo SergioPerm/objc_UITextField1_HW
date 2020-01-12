@@ -281,7 +281,7 @@
                                     <constraint firstItem="YVU-sM-gJk" firstAttribute="top" secondItem="jhq-4M-h4n" secondAttribute="top" id="FVV-rM-RMD"/>
                                     <constraint firstItem="YVU-sM-gJk" firstAttribute="leading" secondItem="jhq-4M-h4n" secondAttribute="leading" id="Oin-dm-2hO"/>
                                     <constraint firstAttribute="trailing" secondItem="YVU-sM-gJk" secondAttribute="trailing" id="TCX-M8-Xho"/>
-                                    <constraint firstItem="YVU-sM-gJk" firstAttribute="height" secondItem="jhq-4M-h4n" secondAttribute="height" priority="250" id="fRC-3V-l2s"/>
+                                    <constraint firstItem="YVU-sM-gJk" firstAttribute="height" secondItem="jhq-4M-h4n" secondAttribute="height" id="fRC-3V-l2s"/>
                                 </constraints>
                                 <viewLayoutGuide key="contentLayoutGuide" id="Q29-5D-XlY"/>
                                 <viewLayoutGuide key="frameLayoutGuide" id="bCI-7y-bFS"/>
