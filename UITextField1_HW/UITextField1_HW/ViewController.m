@@ -9,8 +9,8 @@
 #import "ViewController.h"
 
 typedef enum {
-    regFormFirstName        = 0,
-    regFormLastName         = 1,
+    regFormLastName         = 0,
+    regFormFirstName        = 1,
     regFormLogin            = 2,
     regFormPass             = 3,
     regFormAge              = 4,
@@ -28,6 +28,8 @@ typedef enum {
 
 @property (assign, nonatomic) BOOL willMakeKeyboardOffset;
 
+@property (strong, nonatomic) NSMutableDictionary* mapingTextFieldsLabelsDictionary;
+
 @end
 
 @implementation ViewController
@@ -36,11 +38,11 @@ typedef enum {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
     
-    UIToolbar* numberToolbar = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 0, 320, 50)];
-    numberToolbar.barStyle = UIBarStyleBlack;
-    numberToolbar.items = @[[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
-                         [[UIBarButtonItem alloc]initWithTitle:@"Next" style:UIBarButtonItemStyleDone target:self action:@selector(doneWithNumberPad)]];
-    [numberToolbar sizeToFit];
+//    UIToolbar* numberToolbar = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 0, 320, 50)];
+//    numberToolbar.barStyle = UIBarStyleBlack;
+//    numberToolbar.items = @[[[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil],
+//                         [[UIBarButtonItem alloc]initWithTitle:@"Next" style:UIBarButtonItemStyleDone target:self action:@selector(doneWithNumberPad)]];
+//    [numberToolbar sizeToFit];
         
     UITextField* firstTextField;
     
@@ -52,13 +54,29 @@ typedef enum {
 
         textField.delegate = self;
 
-        if (textField.tag == regFormAge || textField.tag == regFormPhone) {
-            textField.inputAccessoryView = numberToolbar;
-        }
+//        if (textField.tag == regFormAge || textField.tag == regFormPhone) {
+//            textField.inputAccessoryView = numberToolbar;
+//        }
         
     }
     
     [firstTextField becomeFirstResponder];
+    
+    [self setMapingTextFieldsLabelsDictionary];
+    
+}
+
+- (void) setMapingTextFieldsLabelsDictionary {
+    
+    self.mapingTextFieldsLabelsDictionary = [NSMutableDictionary dictionary];
+    
+    [self.mapingTextFieldsLabelsDictionary setObject:self.secondNameInfoLabel forKey: [@(regFormLastName) stringValue]];
+    [self.mapingTextFieldsLabelsDictionary setObject:self.firstNameInfoLabel forKey: [@(regFormFirstName) stringValue]];
+    [self.mapingTextFieldsLabelsDictionary setObject:self.loginInfoLabel forKey: [@(regFormLogin) stringValue]];
+    [self.mapingTextFieldsLabelsDictionary setObject:self.ageInfoLabel forKey: [@(regFormAge) stringValue]];
+    [self.mapingTextFieldsLabelsDictionary setObject:self.phoneInfoLabel forKey: [@(regFormPhone) stringValue]];
+    [self.mapingTextFieldsLabelsDictionary setObject:self.emailInfoLabel forKey: [@(regFormEmail) stringValue]];
+    [self.mapingTextFieldsLabelsDictionary setObject:self.addressInfoLabel forKey: [@(regFormAddress) stringValue]];
     
 }
 
@@ -66,7 +84,7 @@ typedef enum {
         
     [super viewWillAppear:YES];
     
-    [self registerForKeyboardNotifications];
+    [self registerNotifications];
     
 }
 
@@ -74,33 +92,46 @@ typedef enum {
     
     [super viewWillDisappear:YES];
     
-    [self deregisterFromKeyboardNotifications];
+    [self deregisterNotifications];
     
 }
 
-- (void)registerForKeyboardNotifications {
+- (void)registerNotifications {
  
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardWasShown:)
-                                                 name:UIKeyboardWillShowNotification
-                                               object:nil];
- 
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(keyboardWillBeHidden:)
-                                                 name:UIKeyboardWillHideNotification
-                                               object:nil];
+    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
+    
+    [nc addObserver:self
+           selector:@selector(keyboardWasShown:)
+               name:UIKeyboardWillShowNotification
+             object:nil];
+    
+    [nc addObserver:self
+           selector:@selector(keyboardWillBeHidden:)
+               name:UIKeyboardWillHideNotification
+             object:nil];
+    
+    [nc addObserver:self
+           selector:@selector(textFieldDidChange:)
+               name:UITextFieldTextDidChangeNotification
+             object:nil];
  
 }
  
-- (void)deregisterFromKeyboardNotifications {
+- (void)deregisterNotifications {
  
-    [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:UIKeyboardWillShowNotification
-                                                  object:nil];
- 
-    [[NSNotificationCenter defaultCenter] removeObserver:self
-                                                    name:UIKeyboardWillHideNotification
-                                                  object:nil];
+    NSNotificationCenter* nc = [NSNotificationCenter defaultCenter];
+    
+    [nc removeObserver:self
+                  name:UIKeyboardWillShowNotification
+                object:nil];
+    
+    [nc removeObserver:self
+                  name:UIKeyboardWillHideNotification
+                object:nil];
+    
+    [nc removeObserver:self
+                  name:UITextFieldTextDidChangeNotification
+                object:nil];
  
 }
 
@@ -176,27 +207,26 @@ typedef enum {
     
 }
 
-- (void) keyboardWillBeHidden:(NSNotification *)notification {
+- (void) textFieldDidChange:(NSNotification *) notification {
+    
+    UITextField* currentTextField = notification.object;
+    
+    if (currentTextField.tag != regFormPass) {
+        
+        NSLog(@"%@", [@(currentTextField.tag) stringValue]);
+        
+        UILabel* currentLabel = [self.mapingTextFieldsLabelsDictionary objectForKey:[@(currentTextField.tag) stringValue]];
+        currentLabel.text = currentTextField.text;
+        
+    }
+    
+}
+
+- (void) keyboardWillBeHidden:(NSNotification *) notification {
     
     [self resetScrollViewOffset];
     
 }
-
-//- (NSUInteger) getIndexCurrentActiveTextField {
-////
-////    NSUInteger textFieldIndex = 0;
-////
-////    for (UIView *view in self.view.subviews) {
-////        if (view.isFirstResponder) {
-////            textFieldIndex = [self.textFieldsCollection indexOfObject:view];
-////        }
-////    }
-////
-////    self.textFieldsCollection indexOfObject:<#(nonnull id)#>
-////
-//      return textFieldIndex;
-//
-//}
 
 - (void) doneWithNumberPad {
     
