@@ -247,6 +247,64 @@ typedef enum {
     
 }
 
+- (BOOL)validateEmailWithString:(NSString*)email {
+    
+    NSString *emailRegex = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+    NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
+    
+    return [emailTest evaluateWithObject:email];
+    
+}
+
+- (BOOL) validateEmail:(NSString *)emailString  {
+ 
+    return [self validateEmailWithString:emailString];
+    
+}
+
+- (BOOL) formatPhoneNumber:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    
+    NSString *newString = [textField.text stringByReplacingCharactersInRange:range withString:string];
+    NSArray *components = [newString componentsSeparatedByCharactersInSet:[[NSCharacterSet decimalDigitCharacterSet] invertedSet]];
+    NSString *decimalString = [components componentsJoinedByString:@""];
+
+    NSUInteger length = decimalString.length;
+    BOOL hasLeadingEight = length > 0 && [decimalString characterAtIndex:0] == '8';
+
+    if (length == 0 || (length > 10 && !hasLeadingEight) || (length > 11)) {
+        textField.text = decimalString;
+        return NO;
+    }
+
+    NSUInteger index = 0;
+    NSMutableString *formattedString = [NSMutableString string];
+
+    if (hasLeadingEight) {
+        [formattedString appendString:@"8 "];
+        index += 1;
+    }
+
+    if (length - index > 3) {
+        NSString *areaCode = [decimalString substringWithRange:NSMakeRange(index, 3)];
+        [formattedString appendFormat:@"(%@) ",areaCode];
+        index += 3;
+    }
+
+    if (length - index > 3) {
+        NSString *prefix = [decimalString substringWithRange:NSMakeRange(index, 3)];
+        [formattedString appendFormat:@"%@-",prefix];
+        index += 3;
+    }
+
+    NSString *remainder = [decimalString substringFromIndex:index];
+    [formattedString appendString:remainder];
+
+    textField.text = formattedString;
+
+    return NO;
+    
+}
+
 #pragma mark - UITextFieldDelegate
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
@@ -268,4 +326,36 @@ typedef enum {
     
 }
 
+- (BOOL)textFieldShouldEndEditing:(UITextField *)textField {
+    
+    if (textField.tag == regFormEmail) {
+        
+        BOOL validateEmail = [self validateEmail:textField.text];
+        
+        if (validateEmail) {
+            
+            [textField setTextColor:[UIColor blackColor]];
+            
+        } else {
+            
+            [textField setTextColor:[UIColor redColor]];
+            
+            return NO;
+            
+        }
+    }
+    
+    return YES;
+    
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    
+    if (textField.tag == regFormPhone) {
+        return [self formatPhoneNumber:textField shouldChangeCharactersInRange:range replacementString:string];
+    }
+        
+    return YES;
+    
+}
 @end
